@@ -1647,6 +1647,33 @@ public class GameScreen implements Screen {
         applyAugment(r);
     }
 
+    private void saveGameState() {
+        com.td.game.systems.SaveData data = new com.td.game.systems.SaveData();
+        data.mapType = this.mapType.name();
+        data.globalTimer = this.globalTimer;
+
+        waveManager.save(data);
+        economyManager.save(data);
+        player.save(data);
+        inventory.save(data);
+        staffUI.save(data);
+
+        if (mergeBoard.hasSlot1()) data.mergeSlot1 = mergeBoard.getSlot1Element().name();
+        if (mergeBoard.hasSlot2()) data.mergeSlot2 = mergeBoard.getSlot2Element().name();
+        if (mergeBoard.hasResult()) data.mergeResult = mergeBoard.getResultElement().name();
+
+        this.save(data); 
+
+        data.pillars.clear();
+        for (Pillar p : pillars) {
+            com.td.game.systems.SaveData.PillarSaveData pData = new com.td.game.systems.SaveData.PillarSaveData();
+            p.save(pData);
+            data.pillars.add(pData);
+        }
+
+        com.td.game.systems.SaveManager.save(data, mapType);
+    }
+
     public void save(com.td.game.systems.SaveData data) {
         data.globalDamageMult = this.globalDamageMult;
         data.globalRangeMult = this.globalRangeMult;
@@ -2196,8 +2223,13 @@ public class GameScreen implements Screen {
                     return true;
                 }
                 if (isInRect(screenX, flippedY, playBtnX, playBtnY, playBtnW, playBtnH)) {
-                    if (!waveManager.isWaveInProgress() && !waveManager.areAllWavesComplete()) {
-                        waveManager.startNextWave();
+                    if (!waveManager.isWaveInProgress()) {
+                        if (waveManager.areAllWavesComplete()) {
+                            gameWon = true;
+                        } else if (!augmentChoiceActive) {
+                            showAugmentSelection();
+                            saveGameState();
+                        }
                     }
                     return true;
                 }
