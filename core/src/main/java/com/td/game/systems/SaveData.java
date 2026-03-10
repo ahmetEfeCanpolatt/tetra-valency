@@ -62,4 +62,10 @@ public class SaveData {
         acquiredAugments = new Array<>();
         pillars = new Array<>();
     }
+
+    public String toJson() {
+        com.badlogic.gdx.utils.Json json = new com.badlogic.gdx.utils.Json();
+        json.setOutputType(com.badlogic.gdx.utils.JsonWriter.OutputType.json);
+        return json.toJson(this);
+    }
 }
